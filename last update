@@ -1,0 +1,159 @@
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+
+struct livres {
+    char title[100];
+    long ISBN;
+    char author_name[100], author_surname[100];
+    int date, month, year;
+    char publisher[60];
+};
+
+void display_books(struct livres* books, int n)
+{
+    for (int i = 0; i < n; i++) {
+        printf("\n________________________________\n", i);
+        printf("Information for book[%d]:\n", i);
+        printf("Title: %s\n", books[i].title);
+        printf("ISBN code: %ld\n", books[i].ISBN);
+        printf("Author: %s %s\n", books[i].author_name, books[i].author_surname);
+        printf("Publication date: %d/%d/%d\n", books[i].date, books[i].month, books[i].year);
+        printf("Publisher: %s\n", books[i].publisher);
+        printf("\n________________________________\n", i);
+    }
+}
+
+int add_book(struct livres** books, int *n)
+{
+    struct livres new_book;
+    printf("\nEnter information for the new book:\n");
+    printf("\n______________________________________\n");
+    printf("Enter title: ");
+    scanf("%s",new_book.title);
+    getchar();
+    //fgets(new_book.title, sizeof(new_book.title), stdin);
+    //new_book.title[strcspn(new_book.title, "\n")] = 0;
+    printf("\nEnter ISBN code: ");
+    scanf("%ld", &new_book.ISBN);
+    getchar();
+    printf("Enter author's name: ");
+    fgets(new_book.author_name, sizeof(new_book.author_name), stdin);
+    new_book.author_name[strcspn(new_book.author_name, "\n")] = 0;
+    fgets(new_book.author_surname, sizeof(new_book.author_surname), stdin);
+    new_book.author_surname[strcspn(new_book.author_surname, "\n")] = 0;
+    printf("Enter publication date (dd/mm/yyyy): ");
+    scanf("%d/%d/%d", &new_book.date, &new_book.month, &new_book.year);
+    getchar();
+    printf("Enter publisher: ");
+    fgets(new_book.publisher, sizeof(new_book.publisher), stdin);
+    new_book.publisher[strcspn(new_book.publisher, "\n")] = 0;
+    *books = (struct livres*)realloc(*books, (*n+1) * sizeof(struct livres));
+    (*books)[*n] = new_book;
+    (*n)++;
+    return 1;
+}
+
+int edit_book(struct livres* books, int n)
+{
+    int index;
+    printf("Enter Edit book (index): ");
+    scanf("%d", &index);
+    if (index >= n || index < 0) {
+        printf("Error: Invalid index\n");
+        return 0;
+    }
+    printf("Which Edit field?\n 1. Title\n 2. ISBN \n 3. Author \n 4. Publication date \n 5. Publisher \n");
+    int field;
+    scanf("%d", &field);
+    getchar();
+    switch(field)
+    {
+        case 1:
+            printf("Enter new title: ");
+            scanf("%s",books[index].title);
+            getchar();
+            break;
+        case 2:
+            printf("Enter new ISBN code: ");
+            scanf("%ld", &books[index].ISBN);
+            getchar();
+            break;
+        case 3:
+            printf("Enter New author name:");
+            fgets(books[index].author_name, sizeof(books[index].author_name), stdin);
+            books[index].author_name[strcspn(books[index].author_name, "\n")] = 0;
+            fgets(books[index].author_surname, sizeof(books[index].author_surname), stdin);
+            books[index].author_surname[strcspn(books[index].author_surname, "\n")] = 0;
+            break;
+        case 4:
+            printf("Enter new date (dd/mm/yyyy): ");
+            scanf("%d/%d/%d", &books[index].date, &books[index].month, &books[index].year);
+            getchar();
+            break;
+        case 5:
+            printf("Enter new publisher: ");
+            fgets(books[index].publisher, sizeof(books[index].publisher), stdin);
+            books[index].publisher[strcspn(books[index].publisher, "\n")] = 0;
+            break;
+        default:
+            printf("Invalid field\n");
+            break;
+    }
+    return 1;
+}
+
+int delete_book(struct livres** books, int *n)
+{
+    int index;
+    printf("Delete book (index): ");
+    scanf("%d", &index);
+    if (index >= *n || index < 0) {
+        printf("Error: Invalid index\n");
+        return 0;
+    }
+    for (int i = index; i < *n - 1; i++) {
+        (*books)[i] = (*books)[i + 1];
+    }
+    *books = (struct livres*)realloc(*books, (*n-1) * sizeof(struct livres));
+    (*n)--;
+    return 1;
+}
+
+int main()
+{
+    struct livres* books = NULL;
+    int n = 0;
+    int choice;
+    do {
+        printf("\nSelect an option:\n");
+        printf("1. Add a book\n");
+        printf("2. Edit a book\n");
+        printf("3. Delete a book\n");
+        printf("4. Display all books\n");
+        printf("5. Exit\n");
+        scanf("%d", &choice);
+        getchar();
+        switch (choice) {
+        case 1:
+            add_book(&books, &n);
+            break;
+        case 2:
+            edit_book(books, n);
+            break;
+        case 3:
+            delete_book(&books, &n);
+            break;
+        case 4:
+            display_books(books, n);
+            break;
+        case 5:
+            break;
+        default:
+            printf("Invalid option\n");
+            break;
+        }
+    } while (choice != 5);
+    free(books);
+    return 0;
+}
